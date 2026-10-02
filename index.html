@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Blackjack</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background:
+        radial-gradient(circle at center, #087044 0%, #06472f 55%, #022719 100%);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game {
+    width: 100%;
+    max-width: 1000px;
+    background: rgba(0, 20, 12, 0.35);
+    border: 5px solid #c9a227;
+    border-radius: 30px;
+    padding: 25px;
+    box-shadow:
+        0 0 30px rgba(0,0,0,.7),
+        inset 0 0 50px rgba(0,0,0,.3);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #c9a227;
+    padding-bottom: 15px;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #e6c34f;
+    letter-spacing: 2px;
+}
+
+.money {
+    background: #111;
+    border: 1px solid #d8b637;
+    padding: 10px 18px;
+    border-radius: 20px;
+    color: #ffe58a;
+    font-weight: bold;
+}
+
+.hand {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.hand h2 {
+    color: #f5dc83;
+    margin-bottom: 15px;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 110px;
+}
+
+.card {
+    width: 72px;
+    height: 102px;
+    background: linear-gradient(145deg, #fff, #ddd);
+    color: #111;
+    border-radius: 9px;
+    padding: 7px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.5);
+    animation: deal .25s ease;
+}
+
+.card-center {
+    align-self: center;
+    font-size: 30px;
+}
+
+.card-bottom {
+    align-self: flex-end;
+    transform: rotate(180deg);
+}
+
+.red {
+    color: #c91525;
+}
+
+.hidden {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #641515,
+            #641515 6px,
+            #a32626 6px,
+            #a32626 12px
+        );
+    color: white;
+    border: 3px solid #e4c65c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+}
+
+.score {
+    color: white;
+    font-size: 18px;
+}
+
+.message {
+    text-align: center;
+    min-height: 35px;
+    font-size: 23px;
+    font-weight: bold;
+    color: #ffe58a;
+    margin: 15px;
+}
+
+.bet-area {
+    text-align: center;
+    margin: 15px;
+}
+
+.bet-area input {
+    width: 90px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d4af37;
+    background: #10251b;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.chips {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 12px;
+}
+
+.chip {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 3px dashed white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    background: #b51d2a;
+    transition: .2s;
+}
+
+.chip:hover {
+    transform: scale(1.12);
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+button {
+    padding: 13px 25px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(#f4da78, #b58920);
+    color: #241900;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #72560d;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.rules {
+    text-align: center;
+    margin-top: 18px;
+    color: #b9d1c6;
+    font-size: 13px;
+}
+
+@keyframes deal {
+    from {
+        opacity: 0;
+        transform: translateY(-25px) rotate(-8deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) rotate(0);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .game {
+        padding: 15px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .card {
+        width: 55px;
+        height: 80px;
+        font-size: 14px;
+    }
+
+    .card-center {
+        font-size: 22px;
+    }
+
+    button {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="header">
+        <div class="logo">
+            ♠ ROYAL BLACKJACK ♣
+        </div>
+
+        <div class="money">
+            💰 $<span id="money">1000</span>
+        </div>
+    </div>
+
+
+    <!-- DEALER -->
+
+    <div class="hand">
+
+        <h2>
+            DEALER
+            <span class="score">
+                (<span id="dealerScore">?</span>)
+            </span>
+        </h2>
+
+        <div id="dealerCards" class="cards"></div>
+
+    </div>
+
+
+    <!-- PLAYER -->
+
+    <div class="hand">
+
+        <h2>
+            PLAYER
+            <span class="score">
+                (<span id="playerScore">0</span>)
+            </span>
+        </h2>
+
+        <div id="playerCards" class="cards"></div>
+
+    </div>
+
+
+    <div id="message" class="message">
+        Đặt cược rồi bấm DEAL
+    </div>
+
+
+    <!-- BET -->
+
+    <div class="bet-area">
+
+        Cược:
+        <input
+            id="bet"
+            type="number"
+            value="50"
+            min="1"
+        >
+
+    </div>
+
+
+    <!-- CHIP -->
+
+    <div class="chips">
+
+        <div class="chip" data-value="25">
+            25
+        </div>
+
+        <div class="chip" data-value="50">
+            50
+        </div>
+
+        <div class="chip" data-value="100">
+            100
+        </div>
+
+        <div class="chip" data-value="250">
+            250
+        </div>
+
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div class="buttons">
+
+        <button id="newGame">
+            DEAL
+        </button>
+
+        <button id="hit" disabled>
+            HIT
+        </button>
+
+        <button id="stand" disabled>
+            STAND
+        </button>
+
+        <button id="double" disabled>
+            DOUBLE
+        </button>
+
+    </div>
+
+
+    <div class="rules">
+        Blackjack trả 3:2 • Dealer dừng ở 17 • A = 1 hoặc 11
+    </div>
+
+</div>
+
+
+<script>
+
+let deck = [];
+
+let player = [];
+
+let dealer = [];
+
+let money = 1000;
+
+let bet = 50;
+
+let playing = false;
+
+let doubled = false;
+
+
+// ==============================
+// TẠO BỘ BÀI
+// ==============================
+
+function createDeck() {
+
+    deck = [];
+
+    const suits = [
+        "♠",
+        "♥",
+        "♦",
+        "♣"
+    ];
+
+    const ranks = [
+        "A",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "J",
+        "Q",
+        "K"
+    ];
+
+    for (let suit of suits) {
+
+        for (let rank of ranks) {
+
+            deck.push({
+                suit: suit,
+                rank: rank
+            });
+
+        }
+
+    }
+
+    shuffle();
+
+}
+
+
+// ==============================
+// XÁO BÀI
+// ==============================
+
+function shuffle() {
+
+    for (let i = deck.length - 1; i > 0; i--) {
+
+        let j = Math.floor(
+            Math.random() * (i + 1)
+        );
+
+        [
+            deck[i],
+            deck[j]
+        ] = [
+            deck[j],
+            deck[i]
+        ];
+
+    }
+
+}
+
+
+// ==============================
+// RÚT BÀI
+// ==============================
+
+function drawCard() {
+
+    return deck.pop();
+
+}
+
+
+// ==============================
+// TÍNH ĐIỂM
+// ==============================
+
+function getScore(cards) {
+
+    let score = 0;
+
+    let aces = 0;
+
+    for (let card of cards) {
+
+        if (card.rank === "A") {
+
+            score += 11;
+
+            aces++;
+
+        }
+
+        else if (
+            card.rank === "K" ||
+            card.rank === "Q" ||
+            card.rank === "J"
+        ) {
+
+            score += 10;
+
+        }
+
+        else {
+
+            score += Number(card.rank);
+
+        }
+
+    }
+
+
+    while (
+        score > 21 &&
+        aces > 0
+    ) {
+
+        score -= 10;
+
+        aces--;
+
+    }
+
+
+    return score;
+
+}
+
+
+// ==============================
+// HIỂN THỊ LÁ BÀI
+// ==============================
+
+function showCard(card, hidden = false) {
+
+    if (hidden) {
+
+        return `
+            <div class="card hidden">
+                ★
+            </div>
+        `;
+
+    }
+
+
+    let red = "";
+
+    if (
+        card.suit === "♥" ||
+        card.suit === "♦"
+    ) {
+
+        red = "red";
+
+    }
+
+
+    return `
+        <div class="card ${red}">
+
+            <span>
+                ${card.rank}
+            </span>
+
+            <span class="card-center">
+                ${card.suit}
+            </span>
+
+            <span class="card-bottom">
+                ${card.rank}
+            </span>
+
+        </div>
+    `;
+
+}
+
+
+// ==============================
+// CẬP NHẬT GIAO DIỆN
+// ==============================
+
+function updateScreen(showDealer = false) {
+
+    document.getElementById("money")
+        .innerText = money;
+
+
+    document.getElementById("playerScore")
+        .innerText = getScore(player);
+
+
+    document.getElementById("playerCards")
+        .innerHTML =
+        player
+            .map(card => showCard(card))
+            .join("");
+
+
+    if (showDealer) {
+
+        document.getElementById("dealerScore")
+            .innerText = getScore(dealer);
+
+        document.getElementById("dealerCards")
+            .innerHTML =
+            dealer
+                .map(card => showCard(card))
+                .join("");
+
+    }
+
+    else {
+
+        document.getElementById("dealerScore")
+            .innerText = "?";
+
+        document.getElementById("dealerCards")
+            .innerHTML =
+            showCard(dealer[0]) +
+            showCard(dealer[1], true);
+
+    }
+
+
+    document.getElementById("hit")
+        .disabled = !playing;
+
+    document.getElementById("stand")
+        .disabled = !playing;
+
+    document.getElementById("double")
+        .disabled =
+        !playing ||
+        doubled ||
+        money < bet;
+
+}
+
+
+// ==============================
+// KẾT THÚC
+// ==============================
+
+function endGame(message, payout = 0) {
+
+    playing = false;
+
+    money += payout;
+
+    document.getElementById("message")
+        .innerText = message;
+
+    updateScreen(true);
+
+}
+
+
+// ==============================
+// DEAL
+// ==============================
+
+function newGame() {
+
+    let input =
+        Number(
+            document.getElementById("bet").value
+        );
+
+
+    if (!Number.isFinite(input) || input < 1) {
+
+        alert("Tiền cược không hợp lệ!");
+
+        return;
+
+    }
+
+
+    if (input > money) {
+
+        alert("Bạn không đủ tiền!");
+
+        return;
+
+    }
+
+
+    bet = Math.floor(input);
+
+    money -= bet;
+
+
+    createDeck();
+
+
+    player = [
+        drawCard(),
+        drawCard()
+    ];
+
+
+    dealer = [
+        drawCard(),
+        drawCard()
+    ];
+
+
+    playing = true;
+
+    doubled = false;
+
+
+    document.getElementById("message")
+        .innerText = "";
+
+
+    updateScreen(false);
+
+
+    // BLACKJACK
+
+    if (getScore(player) === 21) {
+
+        if (getScore(dealer) === 21) {
+
+            endGame(
+                "PUSH — Cả hai đều Blackjack!",
+                bet
+            );
+
+        }
+
+        else {
+
+            endGame(
+                "♠ BLACKJACK! Bạn thắng!",
+                Math.floor(bet * 2.5)
+            );
+
+        }
+
+    }
+
+}
+
+
+// ==============================
+// HIT
+// ==============================
+
+function hit() {
+
+    if (!playing) return;
+
+
+    player.push(drawCard());
+
+
+    let score =
+        getScore(player);
+
+
+    updateScreen(false);
+
+
+    if (score > 21) {
+
+        endGame(
+            "BUST! Bạn quá 21!"
+        );
+
+    }
+
+    else if (score === 21) {
+
+        stand();
+
+    }
+
+}
+
+
+// ==============================
+// STAND
+// ==============================
+
+function stand() {
+
+    if (!playing) return;
+
+
+    while (
+        getScore(dealer) < 17
+    ) {
+
+        dealer.push(drawCard());
+
+    }
+
+
+    let playerScore =
+        getScore(player);
+
+    let dealerScore =
+        getScore(dealer);
+
+
+    updateScreen(true);
+
+
+    if (dealerScore > 21) {
+
+        endGame(
+            "DEALER BUST! Bạn thắng! 🎉",
+            bet * 2
+        );
+
+    }
+
+    else if (
+        playerScore > dealerScore
+    ) {
+
+        endGame(
+            "YOU WIN! 🎉",
+            bet * 2
+        );
+
+    }
+
+    else if (
+        playerScore === dealerScore
+    ) {
+
+        endGame(
+            "PUSH — Hòa!",
+            bet
+        );
+
+    }
+
+    else {
+
+        endGame(
+            "DEALER WINS!"
+        );
+
+    }
+
+}
+
+
+// ==============================
+// DOUBLE
+// ==============================
+
+function doubleDown() {
+
+    if (!playing) return;
+
+    if (doubled) return;
+
+
+    if (money < bet) {
+
+        alert(
+            "Không đủ tiền để Double!"
+        );
+
+        return;
+
+    }
+
+
+    money -= bet;
+
+    bet *= 2;
+
+    doubled = true;
+
+
+    player.push(drawCard());
+
+
+    updateScreen(false);
+
+
+    if (getScore(player) > 21) {
+
+        endGame(
+            "DOUBLE — BUST!"
+        );
+
+    }
+
+    else {
+
+        stand();
+
+    }
+
+}
+
+
+// ==============================
+// CHỌN CHIP
+// ==============================
+
+document
+    .querySelectorAll(".chip")
+    .forEach(chip => {
+
+        chip.addEventListener(
+            "click",
+            function() {
+
+                document.getElementById("bet")
+                    .value =
+                    this.dataset.value;
+
+            }
+        );
+
+    });
+
+
+// ==============================
+// NÚT
+// ==============================
+
+document
+    .getElementById("newGame")
+    .addEventListener(
+        "click",
+        newGame
+    );
+
+
+document
+    .getElementById("hit")
+    .addEventListener(
+        "click",
+        hit
+    );
+
+
+document
+    .getElementById("stand")
+    .addEventListener(
+        "click",
+        stand
+    );
+
+
+document
+    .getElementById("double")
+    .addEventListener(
+        "click",
+        doubleDown
+    );
+
+
+// Hiển thị ban đầu
+
+updateScreen(false);
+
+</script>
+
+</body>
+</html>
